@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Util
+Bundle-SymbolicName: net.joelbecker.util
+Bundle-Version: 1.0.0
+Export-Package: net.joelbecker.util.lang,
+ net.joelbecker.util.pattern,
+ net.joelbecker.util.text
+Eclipse-BuddyPolicy: registered

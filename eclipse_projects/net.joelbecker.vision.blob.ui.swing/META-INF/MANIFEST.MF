@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Swing
+Bundle-SymbolicName: net.joelbecker.vision.blob.ui.swing
+Bundle-Version: 1.0.0
+Export-Package: net.joelbecker.vision.blob.ui.swing
+Require-Bundle: net.joelbecker.vision.blob;bundle-version="1.0.0",
+ net.joelbecker.video.processing;bundle-version="1.0.0",
+ net.joelbecker.video.processing.ui.swing;bundle-version="1.0.0",
+ net.joelbecker.util;bundle-version="1.0.0"

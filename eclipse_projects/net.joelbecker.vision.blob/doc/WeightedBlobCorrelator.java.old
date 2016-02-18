@@ -1,0 +1,153 @@
+package net.joelbecker.vision.blob.correlator;
+
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.joelbecker.vision.blob.Blob;
+
+public class WeightedBlobCorrelator implements BlobCorrelator {
+
+	private int nextLabel = 1;
+	private double prevNow = 0.0;
+	
+	public enum Info {
+		POSITION, SIZE, VELOCITY
+	};
+	
+	/** Weight of correlation relevance for each type of information (see {@link Info}). */
+	private double infoWeight[];
+	
+	/**
+	 * Confidence of correlation between each pair of new and old blob, from the
+	 * previous correlation operation (see correlate()).
+	 */
+	private double confidence[][];
+
+	/** Constructor. */
+	public WeightedBlobCorrelator() {
+		infoWeight = new double[] {
+			1, 1, 10
+		};
+	}
+	
+	/** {@inheritDoc} */
+	@Override
+	public List<Blob> correlate(List<Blob> newBlobs, List<Blob> oldBlobs) {
+		List<Blob> correlated;
+		double now = (double) System.nanoTime() / 1000000000.0;
+		double timeSinceLastUpdate = prevNow == 0.0 ? 0.0 : now - prevNow;
+		confidence = new double[newBlobs.size()][oldBlobs.size()];
+		
+		//// Set new blobs' update time to now, since we're "updating" them, and so we can have a consistent timestamp for all of them.
+		for (Blob newBlob : newBlobs) {
+			newBlob.timeLastUpdated = now;
+		}
+		
+		if (newBlobs.size() < oldBlobs.size()) {
+			/*
+			 * There are more old ones than new ones, so start from the old ones
+			 * and reassign some of them to new ones.
+			 */
+			correlated = new ArrayList<Blob>(oldBlobs);
+			if (newBlobs.size() != 0) {
+				int n = 0;
+				for (Blob newBlob : newBlobs) {
+					double highestConfidence = -Double.MAX_VALUE;
+					int mostLikelyOld = -1;
+					int o = 0;
+					for (Blob oldBlob : oldBlobs) {
+						double c = calculateConfidence(newBlob, oldBlob);
+						confidence[n][o] = c;
+						
+						if (c > highestConfidence) {
+							highestConfidence = c;
+							mostLikelyOld = n;
+						}
+						
+						++o;
+					}
+					
+					Blob oldBlob = oldBlobs.get(mostLikelyOld);
+					correlated.set(mostLikelyOld, correlate(newBlob, oldBlob));
+	
+					++n;
+				}
+			}
+			
+			// For each of the blobs that didn't have a corresponding new one, update its missing time 
+			for (Blob blob : correlated) {
+				if (blob.timeLastUpdated != now) {
+					blob.timeMissing += timeSinceLastUpdate;
+				}
+			}
+		} else {
+			/*
+			 * There are more new ones than old ones, so start from the new ones
+			 * and reassign some of them to old ones.
+			 */
+			correlated = new ArrayList<Blob>(newBlobs);
+			if (oldBlobs.size() != 0) {
+				int o = 0;
+				for (Blob oldBlob : oldBlobs) {
+					double highestConfidence = -Double.MAX_VALUE;
+					int mostLikelyNew = -1;
+					int n = 0;
+					for (Blob newBlob : newBlobs) {
+						double c = calculateConfidence(newBlob, oldBlob);
+						confidence[n][o] = c;
+						
+						if (c > highestConfidence) {
+							highestConfidence = c;
+							mostLikelyNew = n;
+						}
+						
+						++n;
+					}
+					
+					Blob newBlob = newBlobs.get(mostLikelyNew);
+					correlated.set(mostLikelyNew, correlate(newBlob, oldBlob));
+					
+					++o;
+				}
+			}
+			
+			//// Assign unused labels to new ones that were not correlated to old ones (new ones whose age is 0)
+			for (Blob blob : correlated) {
+				if (blob.timeLastUpdated == now) {
+					blob.label = nextLabel++;
+				}
+			}
+		}
+		
+		prevNow = now;
+		return correlated;
+	}
+
+	private Blob correlate(Blob newBlob, Blob oldBlob) {
+		oldBlob.bounds = newBlob.bounds;
+		oldBlob.velocity = new Point2D.Double(
+				newBlob.bounds.getCenterX() - oldBlob.bounds.getCenterX(),
+				newBlob.bounds.getCenterY() - oldBlob.bounds.getCenterY());
+		oldBlob.timeMissing = 0.0;
+		oldBlob.frameLabel = newBlob.frameLabel;
+		return oldBlob;
+	}
+	
+	private double calculateConfidence(Blob newBlob, Blob oldBlob) {
+		double predictedX = oldBlob.bounds.getCenterX() + oldBlob.velocity.x;
+		double predictedY = oldBlob.bounds.getCenterY() + oldBlob.velocity.y;
+			// TODO make Y fraction of importance of X (since objects tend to move more horizontally in camera's view typically)
+		double dx = newBlob.bounds.getCenterX() - predictedX;
+		double dy = newBlob.bounds.getCenterY() - predictedY;
+		double deltaDist = Math.sqrt(dx*dx + dy*dy);	// leave distance squared?
+		
+		double dw = Math.abs(newBlob.bounds.getWidth() - oldBlob.bounds.getWidth());
+		double dh = Math.abs(newBlob.bounds.getHeight() - oldBlob.bounds.getHeight());
+		
+		double c = 
+			infoWeight[Info.POSITION.ordinal()] * deltaDist +
+			infoWeight[Info.SIZE.ordinal()] * (dw + dh);
+		return -c;
+	}
+}

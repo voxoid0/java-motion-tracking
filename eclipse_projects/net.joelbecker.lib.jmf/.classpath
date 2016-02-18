@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry exported="true" kind="lib" path="customizer.jar"/>
+	<classpathentry exported="true" kind="lib" path="jmf.jar"/>
+	<classpathentry exported="true" kind="lib" path="mediaplayer.jar"/>
+	<classpathentry exported="true" kind="lib" path="multiplayer.jar"/>
+	<classpathentry exported="true" kind="lib" path="sound.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Processing
+Bundle-SymbolicName: net.joelbecker.video.processing
+Bundle-Version: 1.0.0
+Export-Package: net.joelbecker.video.processing,
+ net.joelbecker.video.processing.camera
+Require-Bundle: net.joelbecker.lib.jmf;bundle-version="1.0.0"

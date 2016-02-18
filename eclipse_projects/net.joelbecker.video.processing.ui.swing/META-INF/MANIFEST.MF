@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Swing
+Bundle-SymbolicName: net.joelbecker.video.processing.ui.swing
+Bundle-Version: 1.0.0
+Export-Package: net.joelbecker.video.processing.ui.swing,
+ net.joelbecker.video.processing.ui.swing.panel
+Require-Bundle: net.joelbecker.video.processing;bundle-version="1.0.0"
+Eclipse-RegisterBuddy: net.joelbecker.util

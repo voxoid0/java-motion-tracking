@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Blob
+Bundle-SymbolicName: net.joelbecker.vision.blob
+Bundle-Version: 1.0.0
+Export-Package: net.joelbecker.vision.blob,
+ net.joelbecker.vision.blob.correlator,
+ net.joelbecker.vision.blob.detector,
+ net.joelbecker.vision.blob.processor
+Require-Bundle: net.joelbecker.video.processing;bundle-version="1.0.0",
+ net.joelbecker.lib.jmf;bundle-version="1.0.0",
+ net.joelbecker.util;bundle-version="1.0.0"
